@@ -15,7 +15,7 @@
         android:textAlignment="center"
         android:layout_marginTop="50dp"
         android:textColor="#fff"
-        android:text="Welcome \nto"
+        android:text="Welcome \nto\nSSEthereum"
         android:textStyle="bold" />
 
     <ImageView

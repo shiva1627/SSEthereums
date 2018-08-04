@@ -32,7 +32,7 @@ public class User_account extends AppCompatActivity {
     ImageView imgUser;
     TextView nameUser, mailUser, txtMainBal, txtCurrBal, txtDogeAddr;
     String personPhotoUrl;
-    String MainBal = "https://sscoinmedia.000webhostapp.com/EthereumWebService/uclaimTimer1.php";
+    String MainBal = "http://sscoinmedia.tech/EthereumWebService/ethereumClaimTimer.php";
     private AdView mAdView;
     RequestQueue requestQueue;
 

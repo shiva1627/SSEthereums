@@ -39,7 +39,7 @@ public class NewsFragment extends Fragment {
     private static final String TAG = "NewsFragment";
     List<News> newsList = new ArrayList<>();
     RequestQueue requestQueue;
-    String News_Url = "https://sscoinmedia.000webhostapp.com/EthereumWebService/uNews1.php";
+    String News_Url = "http://sscoinmedia.tech/EthereumWebService/ethereumNews.php";
     private NativeAd nativeAd;
 
     private LinearLayout nativeAdContainer;

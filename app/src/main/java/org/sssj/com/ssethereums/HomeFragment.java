@@ -40,8 +40,8 @@ import java.util.concurrent.TimeUnit;
 
 public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
-    String Claim_url = "https://sscoinmedia.000webhostapp.com/EthereumWebService/ubalUpdate1.php";
-    String Claim_timer_url = "https://sscoinmedia.000webhostapp.com/EthereumWebService/uclaimTimer1.php";
+      String Claim_url = "http://sscoinmedia.tech/EthereumWebService/ethereumBalanceUpdate.php";
+      String Claim_timer_url = "http://sscoinmedia.tech/EthereumWebService/ethereumClaimTimer.php";
 
 
     CountDownTimer countdt;
@@ -50,7 +50,6 @@ public class HomeFragment extends Fragment {
     Button btnclaim;
   //  private InterstitialAd mInterstitialAd;
 
-    private AdView mAdView;
     private InterstitialAd interstitialAd;
     private AdView adView;
 
@@ -148,7 +147,7 @@ public class HomeFragment extends Fragment {
                     JSONObject jsonObject = new JSONObject(response);
                     Log.i("ZZZZZ", "" + jsonObject.get("success"));
                     txtlastclaim.setText(getString(R.string.lastclaim) + " " + jsonObject.get("claimamt"));
-                    Toast.makeText(getActivity(), "You got " + jsonObject.get("claimamt") + " Doge", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "You got " + jsonObject.get("claimamt") + " Gwei", Toast.LENGTH_SHORT).show();
                     startCountdown(300000, 100);
                     txtubal.setText(jsonObject.get("ubal").toString());
                     Long tsLong = System.currentTimeMillis();
@@ -254,7 +253,8 @@ public class HomeFragment extends Fragment {
                 try {
                     JSONObject jsonObject = new JSONObject(response);
                     txtClaimRate.setText(jsonObject.getString("claimrange"));
-                    Log.i("RESPONCEX", "Timer " + response);
+                    Log.i("XXAAA", "XC " + jsonObject.getString("claimrange"));
+
 
                     Log.i("Claim_Timer", "Diff ->" + jsonObject.get("diff"));
                     txtubal.setText(jsonObject.getDouble("ubal") + "");

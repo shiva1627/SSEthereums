@@ -8,6 +8,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,9 +18,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
+import com.facebook.ads.AdSize;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONException;
@@ -31,13 +30,15 @@ import java.util.Map;
 import dmax.dialog.SpotsDialog;
 
 public class WithdrawActivity extends AppCompatActivity {
-    private static Double minBalance = 5.0;
-    private static Double WDFees = 1.0;
+    private static int minBalance = 1500000;
+    private static int maxBalance = 2500000;
+    private static int WDFees = 10000;
 
-    String Curr_Bal_URL = "https://sscoinmedia.000webhostapp.com/EthereumWebService/uclaimTimer1.php";
-    String Withdraw_URL = "https://sscoinmedia.000webhostapp.com/EthereumWebService/uAddrequest1.php";
+    String Curr_Bal_URL = "http://sscoinmedia.tech/EthereumWebService/ethereumClaimTimer.php";
+    String Withdraw_URL = "http://sscoinmedia.tech/EthereumWebService/ethereumAddrequest.php";
 
-    private AdView mAdView;
+    private com.facebook.ads.AdView adView;
+
     RequestQueue requestQueue;
     FirebaseAuth mAuth;
 
@@ -48,8 +49,8 @@ public class WithdrawActivity extends AppCompatActivity {
     Button btnwithRequest;
     Double currentBal;
     EditText edAmount, edEstiAmt, edDogeAddr;
-    Double WDAmt, WDEstiAmt;
-    String DogeAddr;
+    int WDAmt, WDEstiAmt;
+    String etheAddr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,19 @@ public class WithdrawActivity extends AppCompatActivity {
         edAmount = (EditText) findViewById(R.id.edwithAmt);
         edEstiAmt = (EditText) findViewById(R.id.edwithEstimatedAmt);
         edDogeAddr = (EditText) findViewById(R.id.edwithDogeAddress);
+
+
+        // Instantiate an AdView view
+        adView = new com.facebook.ads.AdView(getApplicationContext(), "359619304562138_368636843660384", AdSize.BANNER_HEIGHT_50);
+
+        // Find the Ad Container
+        LinearLayout adContainer = (LinearLayout) findViewById(R.id.banner_container);
+
+        // Add the ad view to your activity layout
+        adContainer.addView(adView);
+
+        // Request an ad
+        adView.loadAd();
 
       /*  progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading...");*/
@@ -70,18 +84,30 @@ public class WithdrawActivity extends AppCompatActivity {
                 if (!hasFocus) {
                     // code to execute when EditText loses focus
                     try {
-                        Double edamt = Double.parseDouble(edAmount.getText().toString());
-                        if (edamt < currentBal && edamt >= minBalance) {
-                            WDAmt = Double.parseDouble(edAmount.getText().toString());
+                        int edamt = Integer.parseInt(edAmount.getText().toString());
+                        if (edamt < currentBal && edamt >= minBalance && edamt <= maxBalance) {
+                            WDAmt = Integer.parseInt(edAmount.getText().toString());
                             WDEstiAmt = WDAmt - WDFees;
                             edEstiAmt.setText(String.valueOf(WDEstiAmt));
                         } else {
                             edAmount.setText("");
                             edEstiAmt.setText("");
-                            Toast toast = Toast.makeText(WithdrawActivity.this, "You haven't enough balance to request...", Toast.LENGTH_LONG);
-                            // Here we can set the Gravity to Top and Right
-                            toast.setGravity(Gravity.CENTER, 0, -200);
-                            toast.show();
+                            if (edamt > maxBalance) {
+                                Toast toast = Toast.makeText(WithdrawActivity.this, "You can request max 2500000 Gwei per request...", Toast.LENGTH_LONG);
+                                // Here we can set the Gravity to Top and Right
+                                toast.setGravity(Gravity.CENTER, 0, -200);
+                                toast.show();
+                            } else if (edamt < minBalance) {
+                                Toast toast = Toast.makeText(WithdrawActivity.this, "You can request min 1500000 Gwei per request...", Toast.LENGTH_LONG);
+                                // Here we can set the Gravity to Top and Right
+                                toast.setGravity(Gravity.CENTER, 0, -200);
+                                toast.show();
+                            } else  {
+                                Toast toast = Toast.makeText(WithdrawActivity.this, "You haven't enough balance to request...", Toast.LENGTH_LONG);
+                                // Here we can set the Gravity to Top and Right
+                                toast.setGravity(Gravity.CENTER, 0, -200);
+                                toast.show();
+                            }
                         }
                     } catch (NumberFormatException e) {
                         edAmount.setText("");
@@ -100,13 +126,13 @@ public class WithdrawActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 progressDialog.show();
-                DogeAddr = edDogeAddr.getText().toString();
-                if (WDAmt != null && WDEstiAmt != null && !DogeAddr.isEmpty()) {
+                etheAddr = edDogeAddr.getText().toString();
+                if (WDAmt != 0 && WDEstiAmt != 0 && !etheAddr.isEmpty()) {
                     Withdraw_Doge();
                     //Toast.makeText(WithdrawActivity.this, "You can get " + WDEstiAmt + " Doge", Toast.LENGTH_SHORT).show();
                 } else {
                     progressDialog.dismiss();
-                    Toast.makeText(WithdrawActivity.this, "Please Filled All Fiels", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(WithdrawActivity.this, "Please Filled All Fields", Toast.LENGTH_SHORT).show();
 
                 }
             }
@@ -116,12 +142,7 @@ public class WithdrawActivity extends AppCompatActivity {
 
         requestQueue = MySingleton.getInstance(this).getRequestQueue();
 
-        // Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713
-        MobileAds.initialize(this, "ca-app-pub-3940256099942544~3347511713");
-        mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
 
-        mAdView.loadAd(adRequest);
     }
 
     @Override
@@ -189,7 +210,7 @@ public class WithdrawActivity extends AppCompatActivity {
                     if (jsonObject.getInt("success") == 1) {
                         txtCurrentBalance.setText(jsonObject.get("newBal") + "");
                         Log.i("XXXXX", "NewBal " + jsonObject.get("newBal"));
-                        currentBal=jsonObject.getDouble("newBal");
+                        currentBal = jsonObject.getDouble("newBal");
                         Toast.makeText(WithdrawActivity.this, "Request Successfully placed !!!", Toast.LENGTH_LONG).show();
                         edDogeAddr.setText("");
                         edAmount.setText("");
@@ -197,10 +218,9 @@ public class WithdrawActivity extends AppCompatActivity {
                     }
 
 
-
                 } catch (JSONException e) {
                     Toast.makeText(getApplicationContext(), "Error " + e, Toast.LENGTH_SHORT).show();
-                    Log.i("Claim_Timer", " Err " + e);
+                    Log.i("Claim_Timer", " WDRequest Error " + e);
 
                 }
 
@@ -209,8 +229,8 @@ public class WithdrawActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.i("WithdrawActivity", "Error " + error);
-                Toast.makeText(getApplicationContext(), "Error " + error, Toast.LENGTH_SHORT).show();
+                Log.i("WithdrawActivity", "WDResponse Error " + error);
+                Toast.makeText(getApplicationContext(), "WDResponse " + error, Toast.LENGTH_SHORT).show();
 
             }
         }) {
@@ -218,9 +238,9 @@ public class WithdrawActivity extends AppCompatActivity {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> param = new HashMap<>();
                 param.put("email", mAuth.getCurrentUser().getEmail());
-                param.put("reqamt", WDAmt.toString());
+                param.put("reqamt", WDAmt + "");
                 param.put("fees", WDFees + "");
-                param.put("dogeaddress", DogeAddr);
+                param.put("etheaddress", etheAddr);
                 return param;
             }
         };
