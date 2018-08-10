@@ -30,7 +30,7 @@ import dmax.dialog.SpotsDialog;
 public class User_account extends AppCompatActivity {
     FirebaseAuth mAuth;
     ImageView imgUser;
-    TextView nameUser, mailUser, txtMainBal, txtCurrBal, txtDogeAddr;
+    TextView nameUser, mailUser, txtMainBal, txtCurrBal, txtEthAddr, txtCoinbaseAddr;
     String personPhotoUrl;
     String MainBal = "http://sscoinmedia.tech/EthereumWebService/ethereumClaimTimer.php";
     private AdView mAdView;
@@ -56,7 +56,8 @@ public class User_account extends AppCompatActivity {
         mailUser = (TextView) findViewById(R.id.txtUser_pro_name_mail);
         txtMainBal = (TextView) findViewById(R.id.txttotalbal2);
         txtCurrBal = (TextView) findViewById(R.id.txtcurrbal2);
-        txtDogeAddr = (TextView) findViewById(R.id.txtdoge2);
+        txtEthAddr = (TextView) findViewById(R.id.txteth2);
+        txtCoinbaseAddr = (TextView) findViewById(R.id.txtcoinbaseemail);
 
         if (user != null) {
             nameUser.setText(user.getDisplayName());
@@ -83,7 +84,9 @@ public class User_account extends AppCompatActivity {
                     JSONObject jsonObject = new JSONObject(response);
                     txtCurrBal.setText(jsonObject.getString("ubal"));
                     txtMainBal.setText(jsonObject.getString("total"));
-                    txtDogeAddr.setText(jsonObject.getString("daddr"));
+                    txtEthAddr.setText(jsonObject.getString("daddr"));
+                    txtCoinbaseAddr.setText(jsonObject.getString("coinbaseaddr"));
+
 
                 } catch (JSONException e) {
                     progressDialog.dismiss();

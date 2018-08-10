@@ -99,7 +99,7 @@ public class HomeFragment extends Fragment {
 
 
         // Instantiate an AdView view
-        adView = new AdView(getActivity(), "359619304562138_368636843660384", AdSize.BANNER_HEIGHT_50);
+        adView = new AdView(getActivity(), "2011001305879361_2011003952545763", AdSize.BANNER_HEIGHT_50);
 
         // Find the Ad Container
         LinearLayout adContainer = (LinearLayout) view.findViewById(R.id.banner_container);
@@ -113,7 +113,7 @@ public class HomeFragment extends Fragment {
 
 
         // Instantiate an InterstitialAd object
-        interstitialAd = new InterstitialAd(getActivity(), "359619304562138_368636843660384");
+        interstitialAd = new InterstitialAd(getActivity(), "2011001305879361_2011004605879031");
 
         // load the ad
         interstitialAd.loadAd();
@@ -170,7 +170,7 @@ public class HomeFragment extends Fragment {
                     btnclaim.setEnabled(true);
                     // requestQueue.stop();
                     spinner2.setVisibility(View.GONE);
-                    Toast.makeText(getActivity(), "Error " + e, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Please try again...", Toast.LENGTH_SHORT).show();
                     Log.i("ZZZZZ", " Err " + e);
 
                 }
@@ -186,7 +186,7 @@ public class HomeFragment extends Fragment {
                 btnclaim.setEnabled(true);
                 spinner2.setVisibility(View.GONE);
                 Log.i(TAG, "Error " + error);
-                Toast.makeText(getActivity(), "Error " + error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Please try again... " , Toast.LENGTH_SHORT).show();
 
             }
         }) {
@@ -281,7 +281,7 @@ public class HomeFragment extends Fragment {
 
                 } catch (JSONException e) {
                     spinner2.setVisibility(View.GONE);
-                    Toast.makeText(getActivity(), "Error " + e, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Please try again... ", Toast.LENGTH_SHORT).show();
                     Log.i("Claim_Timer", " Err " + e);
 
                 }
@@ -293,7 +293,7 @@ public class HomeFragment extends Fragment {
             public void onErrorResponse(VolleyError error) {
                 spinner2.setVisibility(View.GONE);
                 Log.i(TAG, "Error " + error);
-                Toast.makeText(getActivity(), "Error " + error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Please try again... ", Toast.LENGTH_SHORT).show();
 
             }
         }) {

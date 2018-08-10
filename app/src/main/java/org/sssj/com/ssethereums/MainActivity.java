@@ -1,6 +1,5 @@
 package org.sssj.com.ssethereums;
 
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -11,9 +10,10 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
@@ -46,7 +46,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
-import io.fabric.sdk.android.Fabric;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,11 +53,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static android.Manifest.permission.READ_PHONE_STATE;
+import io.fabric.sdk.android.Fabric;
 
 
-public class MainActivity extends AppCompatActivity
-{
+public class MainActivity extends AppCompatActivity {
+
+
+    private static final int PHONE_STATE_PERMISSION_CONSTANT = 100;
+    private static final int REQUEST_PERMISSION_SETTING = 101;
+    boolean permission_given, firstRun;
+    private SharedPreferences pref;
+    private SharedPreferences.Editor editor;
+
     private static final int RC_SIGN_IN = 234;
     private static final String TAG = "MainActivity";
     private FirebaseAnalytics mFirebaseAnalytics;
@@ -78,10 +84,9 @@ public class MainActivity extends AppCompatActivity
     String Change_Dev_ID = "http://sscoinmedia.tech/EthereumWebService/ethereumUpdateDeviceId.php";
 
 
-    String usergmail, username, deviceId, lastBalance;
+    String usergmail, username, deviceId = "not find", lastBalance;
 
     private ArrayList<String> permissionsToRequest;
-    private ArrayList<String> permissionsRejected = new ArrayList<>();
     private ArrayList<String> permissions = new ArrayList<>();
     private final static int ALL_PERMISSIONS_RESULT = 101;
 
@@ -96,6 +101,51 @@ public class MainActivity extends AppCompatActivity
         Fabric.with(this, new Crashlytics());
 
         setContentView(R.layout.activity_main);
+
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
+        permission_given = pref.getBoolean("permission_given", false);
+
+        if (!permission_given) {
+
+            if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE)) {
+                    //Show Information about why you need the permission
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Need Storage Permission");
+                    builder.setMessage("This app needs storage permission.");
+                    builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, PHONE_STATE_PERMISSION_CONSTANT);
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Toast.makeText(MainActivity.this, "Clicked no", Toast.LENGTH_SHORT).show();
+                            /*Intent in=new Intent(MainActivity.this,HowToUse.class);
+                            startActivity(in);
+                            finish();*/
+                            dialog.cancel();
+                        }
+                    });
+                    builder.show();
+                } else {
+                    //just request the permission
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, PHONE_STATE_PERMISSION_CONSTANT);
+                }
+
+            } else {
+
+                proceedAfterPermission();
+            }
+        } else {
+
+            proceedAfterPermission();
+
+        }
+
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         Window window = this.getWindow();
@@ -119,13 +169,6 @@ public class MainActivity extends AppCompatActivity
         spinner = (ProgressBar) findViewById(R.id.progressBar1);
         spinner.setVisibility(View.GONE);
 
-        permissions.add(READ_PHONE_STATE);
-        permissionsToRequest = findUnAskedPermissions(permissions);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (permissionsToRequest.size() > 0)
-                requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
-        }
-
 
         progressBar = new ProgressDialog(this);
         requestQueue = MySingleton.getInstance(this).getRequestQueue();  //using singleton object
@@ -133,7 +176,6 @@ public class MainActivity extends AppCompatActivity
                 TELEPHONY_SERVICE);
 
         /* getDeviceId() returns the unique device ID.*/
-        deviceId = telephonyManager.getDeviceId();
         /* getSubscriberId() returns the unique subscriber ID,         */
 
         //  String subscriberId = telephonyManager.getSubscriberId();
@@ -176,24 +218,25 @@ public class MainActivity extends AppCompatActivity
 
 
         if (is_Internet()) {
-                if (currentTime > newTime) {
-                    FirebaseAuth.getInstance().signOut();
+            if (currentTime > newTime) {
+                FirebaseAuth.getInstance().signOut();
+            } else {
+                if (mAuth.getCurrentUser() != null) {
+                    usergmail = mAuth.getCurrentUser().getEmail();
+                    Intent in = new Intent(MainActivity.this, ProfileActivity.class);
+                    in.putExtra("usergmail", usergmail);
+                    in.putExtra("ubal", lastBalance);
+                    startActivity(in);
+                    finish();
                 } else {
-                    if (mAuth.getCurrentUser() != null) {
-                        usergmail = mAuth.getCurrentUser().getEmail();
-                        Intent in = new Intent(MainActivity.this, ProfileActivity.class);
-                        in.putExtra("usergmail", usergmail);
-                        in.putExtra("ubal", lastBalance);
-                        startActivity(in);
-                        finish();
-                    } else {
-                        // Log.i("XXXXX", "User Null");
-                    }
-
+                    // Log.i("XXXXX", "User Null");
                 }
+
+            }
         } else {
-            finish();;
-            startActivity(new Intent(MainActivity.this,Try_again.class));
+            finish();
+            ;
+            startActivity(new Intent(MainActivity.this, Try_again.class));
         }
 
 
@@ -210,7 +253,14 @@ public class MainActivity extends AppCompatActivity
                 firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
                 spinner.setVisibility(View.GONE);
-                Toast.makeText(MainActivity.this, "Google responce error" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Please try again...", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        if (requestCode == REQUEST_PERMISSION_SETTING) {
+            if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                //Got Permission
+                //  proceedAfterPermission();
             }
         }
     }
@@ -226,7 +276,7 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.i("XXX1","In Firebase sign in");
+                            Log.i("XXX1", "In Firebase sign in");
 
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
@@ -238,7 +288,7 @@ public class MainActivity extends AppCompatActivity
                             spinner.setVisibility(View.GONE);
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                            Toast.makeText(MainActivity.this, "Authentication failed, Please try again...",
                                     Toast.LENGTH_SHORT).show();
                         }
 
@@ -247,7 +297,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void signIn() {
-        Log.i("XXX1","In sign in");
+        Log.i("XXX1", "In sign in");
         //getting the google signin intent
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -299,78 +349,6 @@ public class MainActivity extends AppCompatActivity
         requestQueue.add(addStringRequest);
     }
 
-    private ArrayList<String> findUnAskedPermissions(ArrayList<String> wanted) {
-        ArrayList<String> result = new ArrayList<String>();
-
-        for (String perm : wanted) {
-            if (!hasPermission(perm)) {
-                result.add(perm);
-            }
-        }
-
-        return result;
-    }
-
-    private boolean hasPermission(String permission) {
-        if (canMakeSmores()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                return (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED);
-            }
-        }
-        return true;
-    }
-
-    private boolean canMakeSmores() {
-        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
-    }
-
-
-    @TargetApi(Build.VERSION_CODES.M)
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-
-        switch (requestCode) {
-
-            case ALL_PERMISSIONS_RESULT:
-                for (String perms : permissionsToRequest) {
-                    if (!hasPermission(perms)) {
-                        permissionsRejected.add(perms);
-                    }
-                }
-
-                if (permissionsRejected.size() > 0) {
-
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (shouldShowRequestPermissionRationale(permissionsRejected.get(0))) {
-                            showMessageOKCancel("These permissions are mandatory for the application. Please allow access.",
-                                    new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                                requestPermissions(permissionsRejected.toArray(new String[permissionsRejected.size()]), ALL_PERMISSIONS_RESULT);
-                                            }
-                                        }
-                                    });
-                            return;
-                        }
-                    }
-
-                }
-
-                break;
-        }
-
-    }
-
-    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
-        new AlertDialog.Builder(MainActivity.this)
-                .setMessage(message)
-                .setPositiveButton("OK", okListener)
-                .setNegativeButton("Cancel", null)
-                .create()
-                .show();
-    }
 
     //Checking internet present or not
     public boolean is_Internet() {
@@ -443,60 +421,57 @@ public class MainActivity extends AppCompatActivity
         requestQueue.add(addStringRequest);
     }
 
-   /* //checking user or device already present
-    private boolean Check_user_And_DeviceID() {
+    private void proceedAfterPermission() {
+        editor = pref.edit();
+        editor.putBoolean("permission_given ", true);
+        deviceId = telephonyManager.getDeviceId();
+        Log.i("SHIVAJI", "Per Set" + deviceId);
 
-        StringRequest addStringRequest = new StringRequest(Request.Method.POST, URLADD, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                spinner.setVisibility(View.GONE);
+       /* Intent in = new Intent(MainActivity.this, MainActivity.class);
+        startActivity(in);
+        finish();*/
+    }
 
-                Log.i("XXXXX",response);
-             *//*   try {
-                    JSONObject jsonObject = new JSONObject(response);
-                    switch (jsonObject.getInt("success")) {
-                        case 2:
-                            bolDevPresent = true;
-                            // NewDeviceFound();
-                            //   Toast.makeText(MainActivity.this, "New Device Found!!!", Toast.LENGTH_SHORT).show();
-                            break;
-                        case 3:
-                            bolDevPresent = true;
-                            // mGoogleSignInClient.signOut();
-                            //  Toast.makeText(MainActivity.this, "New Gmail found on same device,try to Login with register Gmail account !!! ", Toast.LENGTH_LONG).show();
-                            break;
-                    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PHONE_STATE_PERMISSION_CONSTANT) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //The External Storage Write Permission is granted to you... Continue your left job...
+                proceedAfterPermission();
+            } else {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE)) {
+                    //Show Information about why you need the permission
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Need Storage Permission");
+                    builder.setMessage("This app needs storage permission");
+                    builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, PHONE_STATE_PERMISSION_CONSTANT);
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            /*Intent in = new Intent(SplashScreen.this, HowToUse.class);
+                            in.putExtra("from", 1);
+                            startActivity(in);
+                            dialog.cancel();
+                            finish();*/
+                            Toast.makeText(getBaseContext(), "Unable to get Permission", Toast.LENGTH_LONG).show();
 
-                    // Log.i("XXXXX", "Res " + response);
-
-                } catch (JSONException e) {
-                    spinner.setVisibility(View.GONE);
-                    Log.i(TAG, " Err " + e);
-
-                }*//*
-
-
+                        }
+                    });
+                    builder.show();
+                } else {
+                    Toast.makeText(getBaseContext(), "Unable to get Permission", Toast.LENGTH_LONG).show();
+                }
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                spinner.setVisibility(View.GONE);
-                Log.i(TAG, "Response Error " + error);
-                Toast.makeText(MainActivity.this, "Response Error  " + error, Toast.LENGTH_SHORT).show();
+        }
+    }
 
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> param = new HashMap<>();
-                param.put("email", "shiva.281191@gmail.com");
-                param.put("name", username);
-                param.put("devid", deviceId);
-                return param;
-            }
-        };
-        requestQueue.add(addStringRequest);
-        return bolDevPresent;
-    }*/
 
 }

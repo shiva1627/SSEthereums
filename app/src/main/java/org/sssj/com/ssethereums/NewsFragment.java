@@ -64,7 +64,6 @@ public class NewsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-       // Toast.makeText(getActivity(),"OnResumee",Toast.LENGTH_LONG).show();
     }
 
     private void Show_News() {
@@ -73,7 +72,6 @@ public class NewsFragment extends Fragment {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        // Toast.makeText(getContext(), "From Server", Toast.LENGTH_SHORT).show();
                         // for 1st array url
                         try {
 
@@ -119,7 +117,7 @@ public class NewsFragment extends Fragment {
     }
 
     private void loadNativeAd() {
-        nativeAd = new NativeAd(getActivity(), "359619304562138_368633560327379");
+        nativeAd = new NativeAd(getActivity(), "2011001305879361_2011001399212685");
 
         nativeAd.setAdListener(new AdListener() {
 
@@ -157,7 +155,6 @@ public class NewsFragment extends Fragment {
     }
 
     private void inflateAd(NativeAd nativeAd) {
-      //  Toast.makeText(getActivity(), "Nativeads Loaded", Toast.LENGTH_SHORT).show();
 
         nativeAd.unregisterView();
 
@@ -212,6 +209,5 @@ public class NewsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-     //   Toast.makeText(getActivity(), "OnDestroy", Toast.LENGTH_SHORT).show();
     }
 }
