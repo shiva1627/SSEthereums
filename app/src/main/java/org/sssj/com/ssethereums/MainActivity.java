@@ -1,19 +1,14 @@
 package org.sssj.com.ssethereums;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
@@ -58,13 +53,6 @@ import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity {
 
-
-    private static final int PHONE_STATE_PERMISSION_CONSTANT = 100;
-    private static final int REQUEST_PERMISSION_SETTING = 101;
-    boolean permission_given, firstRun;
-    private SharedPreferences pref;
-    private SharedPreferences.Editor editor;
-
     private static final int RC_SIGN_IN = 234;
     private static final String TAG = "MainActivity";
     private FirebaseAnalytics mFirebaseAnalytics;
@@ -102,50 +90,6 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        pref = PreferenceManager.getDefaultSharedPreferences(this);
-        permission_given = pref.getBoolean("permission_given", false);
-
-        if (!permission_given) {
-
-            if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE)) {
-                    //Show Information about why you need the permission
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("Need Storage Permission");
-                    builder.setMessage("This app needs storage permission.");
-                    builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, PHONE_STATE_PERMISSION_CONSTANT);
-                        }
-                    });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // Toast.makeText(MainActivity.this, "Clicked no", Toast.LENGTH_SHORT).show();
-                            /*Intent in=new Intent(MainActivity.this,HowToUse.class);
-                            startActivity(in);
-                            finish();*/
-                            dialog.cancel();
-                        }
-                    });
-                    builder.show();
-                } else {
-                    //just request the permission
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, PHONE_STATE_PERMISSION_CONSTANT);
-                }
-
-            } else {
-
-                proceedAfterPermission();
-            }
-        } else {
-
-            proceedAfterPermission();
-
-        }
-
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         Window window = this.getWindow();
@@ -174,6 +118,8 @@ public class MainActivity extends AppCompatActivity {
         requestQueue = MySingleton.getInstance(this).getRequestQueue();  //using singleton object
         telephonyManager = (TelephonyManager) getSystemService(Context.
                 TELEPHONY_SERVICE);
+        deviceId = telephonyManager.getDeviceId();
+
 
         /* getDeviceId() returns the unique device ID.*/
         /* getSubscriberId() returns the unique subscriber ID,         */
@@ -257,12 +203,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        if (requestCode == REQUEST_PERMISSION_SETTING) {
-            if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                //Got Permission
-                //  proceedAfterPermission();
-            }
-        }
+
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
@@ -419,58 +360,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         requestQueue.add(addStringRequest);
-    }
-
-    private void proceedAfterPermission() {
-        editor = pref.edit();
-        editor.putBoolean("permission_given ", true);
-        deviceId = telephonyManager.getDeviceId();
-        Log.i("SHIVAJI", "Per Set" + deviceId);
-
-       /* Intent in = new Intent(MainActivity.this, MainActivity.class);
-        startActivity(in);
-        finish();*/
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PHONE_STATE_PERMISSION_CONSTANT) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //The External Storage Write Permission is granted to you... Continue your left job...
-                proceedAfterPermission();
-            } else {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, android.Manifest.permission.READ_PHONE_STATE)) {
-                    //Show Information about why you need the permission
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("Need Storage Permission");
-                    builder.setMessage("This app needs storage permission");
-                    builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, PHONE_STATE_PERMISSION_CONSTANT);
-                        }
-                    });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            /*Intent in = new Intent(SplashScreen.this, HowToUse.class);
-                            in.putExtra("from", 1);
-                            startActivity(in);
-                            dialog.cancel();
-                            finish();*/
-                            Toast.makeText(getBaseContext(), "Unable to get Permission", Toast.LENGTH_LONG).show();
-
-                        }
-                    });
-                    builder.show();
-                } else {
-                    Toast.makeText(getBaseContext(), "Unable to get Permission", Toast.LENGTH_LONG).show();
-                }
-            }
-        }
     }
 
 
