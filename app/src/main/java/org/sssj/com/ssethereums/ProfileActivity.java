@@ -11,7 +11,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -29,13 +28,13 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
 
 
     private ViewPager mViewPager;
-     String personPhotoUrl;
+    String personPhotoUrl;
     TextView txtEmail;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-
 
 
         msectionPageAdapter = new SectionPageAdapter(getSupportFragmentManager());
@@ -52,7 +51,7 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
         TextView navUsername = (TextView) headerView.findViewById(R.id.nav_email);
 
 
-        FirebaseUser user= FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (user != null) {
 
@@ -62,12 +61,11 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
         }
 
 
-        ImageView imgUser=(ImageView) headerView.findViewById(R.id.nav_img);
+        ImageView imgUser = (ImageView) headerView.findViewById(R.id.nav_img);
 
         Glide.with(getApplicationContext()).load(personPhotoUrl)
                 .thumbnail(0.5f)
                 .into(imgUser);
-
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -121,6 +119,9 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
             intent.putExtra(Intent.EXTRA_SUBJECT, "SSDoge App Support Request #");
             intent.putExtra(Intent.EXTRA_TEXT, "");
             startActivity(Intent.createChooser(intent, "Choose an Email client :"));
+
+        } else if (id == R.id.nav_rateus) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=org.sssj.com.ssethereums")));
 
         } else if (id == R.id.nav_logout) {
 

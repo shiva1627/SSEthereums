@@ -47,7 +47,6 @@ public class User_account extends AppCompatActivity {
         progressDialog = new SpotsDialog(this, R.style.Custom);
         progressDialog.show();
 
-        AdRequest adRequest = new AdRequest.Builder().build();
         requestQueue = MySingleton.getInstance(getApplicationContext()).getRequestQueue();
 
 

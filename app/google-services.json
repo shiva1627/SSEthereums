@@ -15,11 +15,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "366884589820-7v241kf2sunf4mv0707qi9qnejitu3gp.apps.googleusercontent.com",
+          "client_id": "366884589820-etee3lua71rn04s0fqb6ibsdt8m4rg18.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "org.sssj.com.ssethereums",
             "certificate_hash": "be4ef839dc6247e99399db3ee375b45d5f9a432c"
+          }
+        },
+        {
+          "client_id": "366884589820-dueigduh2ttrtivrt88ibch8fk2qovhg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.sssj.com.ssethereums",
+            "certificate_hash": "40ee34e70ca1228863e6127bd251e02009429c02"
           }
         },
         {

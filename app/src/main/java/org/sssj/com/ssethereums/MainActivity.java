@@ -7,8 +7,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
@@ -83,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String DATE_FORMAT_MM_dd_yyyy_HH_mm_ss = "MM.dd.yyyy:HH.mm.ss";
     Long currentTime, newTime, savedTime;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -199,7 +202,8 @@ public class MainActivity extends AppCompatActivity {
                 firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
                 spinner.setVisibility(View.GONE);
-                Toast.makeText(MainActivity.this, "Please try again...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Slow internet ... please try again!!!", Toast.LENGTH_SHORT).show();
+                Log.i("XXX1", "Log in error " + e);
             }
         }
 
@@ -261,9 +265,11 @@ public class MainActivity extends AppCompatActivity {
                             break;
                         case 2:
                             NewDeviceFound();
+                            Toast.makeText(MainActivity.this, "New Device Found!!!", Toast.LENGTH_SHORT).show();
                             break;
                         case 3:
                             mGoogleSignInClient.signOut();
+                            Toast.makeText(MainActivity.this, "New Gmail found on same device,try to Login with register Gmail account !!! ", Toast.LENGTH_LONG).show();
                             break;
                     }
                 } catch (JSONException e) {
@@ -276,6 +282,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 spinner.setVisibility(View.GONE);
+                Toast.makeText(MainActivity.this, "Network problem, please try after some time  ", Toast.LENGTH_LONG).show();
+
             }
         }) {
             @Override
@@ -348,6 +356,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 spinner.setVisibility(View.GONE);
+                Toast.makeText(MainActivity.this, "Network problem, please try after some time  ", Toast.LENGTH_LONG).show();
+
             }
         }) {
             @Override
