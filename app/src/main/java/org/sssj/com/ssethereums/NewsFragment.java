@@ -54,7 +54,6 @@ public class NewsFragment extends Fragment {
         NewsRecyclerView = (RecyclerView) view.findViewById(R.id.recycleview);
         NewsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         //NewsRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        AdSettings.addTestDevice("80d7b3c1-4d39-42ed-b348-6ac99ac2150c");
         requestQueue = MySingleton.getInstance(getActivity()).getRequestQueue();  //using singleton object
         Show_News();
         loadNativeAd();

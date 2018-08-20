@@ -70,7 +70,6 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.home_fragment, container, false);
 
-        AdSettings.addTestDevice("80d7b3c1-4d39-42ed-b348-6ac99ac2150c");
         sharedpreferences = getActivity().getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
 
         requestQueue = MySingleton.getInstance(getActivity()).getRequestQueue();
