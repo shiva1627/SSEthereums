@@ -18,8 +18,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.facebook.ads.AdSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.startapp.android.publish.adsCommon.StartAppAd;
+import com.startapp.android.publish.adsCommon.StartAppSDK;
 
 public class ProfileActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -34,7 +37,15 @@ public class ProfileActivity extends AppCompatActivity implements NavigationView
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        StartAppSDK.init(this, "207815866", false);
+        StartAppSDK.setUserConsent (getApplicationContext(),
+                "pas",
+                System.currentTimeMillis(),
+                true);
+        StartAppAd.disableSplash();
+        StartAppAd.disableAutoInterstitial();
         setContentView(R.layout.activity_profile);
+        AdSettings.addTestDevice("d445f630-b640-4227-8b90-3acbfe7aa26d");
 
 
         msectionPageAdapter = new SectionPageAdapter(getSupportFragmentManager());

@@ -1,6 +1,8 @@
 package org.sssj.com.ssethereums;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -37,6 +39,8 @@ public class User_account extends AppCompatActivity {
     RequestQueue requestQueue;
 
     private AlertDialog progressDialog;
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor prefseditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +52,10 @@ public class User_account extends AppCompatActivity {
         progressDialog.show();
 
         requestQueue = MySingleton.getInstance(getApplicationContext()).getRequestQueue();
-
+        prefs = getSharedPreferences("startappCount", Context.MODE_PRIVATE);
+        prefseditor = prefs.edit();
+        prefseditor.putInt("startappCount", 1);
+        prefseditor.commit();
 
         imgUser = (ImageView) findViewById(R.id.user_pro_image);
         nameUser = (TextView) findViewById(R.id.txtUser_pro_name);

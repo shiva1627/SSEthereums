@@ -30,6 +30,7 @@ import com.facebook.ads.InterstitialAd;
 import com.facebook.ads.NativeAd;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.startapp.android.publish.adsCommon.StartAppAd;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,10 +61,14 @@ public class HomeFragment extends Fragment {
 
     public static final String MyPREFERENCES = "MyPrefs";
     SharedPreferences sharedpreferences;
+    private StartAppAd startAppAd;
 
     private NativeAd nativeAd;
     private LinearLayout nativeAdContainer;
     private LinearLayout nativeadView;
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor prefseditor;
+    int startappCount;
 
     @Nullable
     @Override
@@ -71,7 +76,9 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.home_fragment, container, false);
 
         sharedpreferences = getActivity().getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-
+        prefs = getActivity().getSharedPreferences("startappCount", Context.MODE_PRIVATE);
+        requestQueue = MySingleton.getInstance(getActivity()).getRequestQueue();
+        startAppAd = new StartAppAd(getActivity());
         requestQueue = MySingleton.getInstance(getActivity()).getRequestQueue();
 
         spinner2 = (ProgressBar) view.findViewById(R.id.progressBar2);
@@ -157,15 +164,26 @@ public class HomeFragment extends Fragment {
                     editor.putLong("LastClaim", tsLong);
                     editor.putString("lastBalance", jsonObject.get("ubal").toString());
 
-                    editor.commit();
+                    editor.apply();
 
-                    // requestQueue.stop();
+                    if (!interstitialAd.show()) {
+                        startAppAd.showAd("ssE_ClaimInterstetial"); // show the ad
+                        startAppAd.loadAd(); // load the next ad
+                    } else {
+                        interstitialAd.loadAd();
+                    }
 
-                   load_interstitial();
+                   /* prefseditor = prefs.edit();
+                    prefseditor.putInt("startappCount", 1);
+                    prefseditor.apply();*/
+                    // StartAppAd.disableAutoInterstitial();
+                    //  StartAppAd.showAd(getActivity());
 
                 } catch (JSONException e) {
-                   load_interstitial();
-
+                    prefseditor = prefs.edit();
+                    prefseditor.putInt("startappCount", 1);
+                    prefseditor.apply();
+                    load_interstitial();
                     btnclaim.setEnabled(true);
                     // requestQueue.stop();
                     spinner2.setVisibility(View.GONE);
@@ -179,6 +197,9 @@ public class HomeFragment extends Fragment {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                prefseditor = prefs.edit();
+                prefseditor.putInt("startappCount", 1);
+                prefseditor.apply();
                 load_interstitial();
 
                 // requestQueue.stop();
@@ -201,8 +222,24 @@ public class HomeFragment extends Fragment {
     }
 
     private void load_interstitial() {
-        // Show the ad
-        interstitialAd.show();
+        startappCount = prefs.getInt("startappCount", 0);
+
+        if (startappCount == 1) {
+
+            if (!interstitialAd.show()) {
+
+                startAppAd.showAd("ssE_ResumeInterstetial"); // show the ad
+                startAppAd.loadAd();
+
+            } else {
+                interstitialAd.loadAd();
+
+            }
+        }
+        prefseditor = prefs.edit();
+        prefseditor.putInt("startappCount", 0);
+        prefseditor.apply();
+
     }
 
 
@@ -316,5 +353,10 @@ public class HomeFragment extends Fragment {
             interstitialAd.destroy();
         }
         super.onDestroy();
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        interstitialAd.loadAd();
     }
 }

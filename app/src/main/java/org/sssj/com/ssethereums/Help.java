@@ -1,5 +1,7 @@
 package org.sssj.com.ssethereums;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +18,9 @@ public class Help extends AppCompatActivity {
     private ImageButton btn_toggle_help, btn_toggle_claim, btn_toggle_withdraw, btn_toggle_fees, btn_toggle_payoutday;
     private Button btn_hide_help, btn_hide_claim, btn_hide_withdraw, btn_hide_fees, btn_hide_payoutday;
     private View lyt_expand_help, lyt_expand_claim, lyt_expand_withdraw, lyt_expand_fees, lyt_expand_payoutday;
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor prefseditor;
+    int startappCount = 0;
 
 
     @Override
@@ -23,7 +28,10 @@ public class Help extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_help);
         parent_view = findViewById(android.R.id.content);
-
+        prefs = getSharedPreferences("startappCount", Context.MODE_PRIVATE);
+        prefseditor = prefs.edit();
+        prefseditor.putInt("startappCount", 1);
+        prefseditor.apply();
 
         initComponent();
     }

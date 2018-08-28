@@ -60,6 +60,7 @@ Note:- Subject to change any time.</string>
     <string name="request">Request</string>
     <string name="coinbase_email">Coinbase Email</string>
     <string name="ethereum_address">Ethereum Address</string>
+    <string name="install">INSTALL</string>
 
 
 </resources>

@@ -1,6 +1,8 @@
 package org.sssj.com.ssethereums;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -62,11 +64,17 @@ public class WithdrawActivity extends AppCompatActivity implements AdapterView.O
     int WDAmt, WDEstiAmt, WDEstiAmtCoin;
     String etheAddr = "", coinbaseId = "", payMethod;
     String emailPattern;
-
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor prefseditor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_withdraw);
+        prefs = getSharedPreferences("startappCount", Context.MODE_PRIVATE);
+        prefseditor = prefs.edit();
+        prefseditor.putInt("startappCount", 1);
+        prefseditor.apply();
+
         txtCurrentBalance = (TextView) findViewById(R.id.txtwbalance2);
 
         edAmount = (EditText) findViewById(R.id.edwithAmt);
